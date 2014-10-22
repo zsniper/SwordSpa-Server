@@ -1,7 +1,7 @@
 {
 
   // Java verticle
-  "main":"com.swordspa.PingVerticle",
+  //"main":"com.swordspa.MongoTestVerticle",
 
   // In this example we also provide various other versions of the main verticle, you can uncomment this and
   // play around:
@@ -20,6 +20,7 @@
 
   // JavaScript verticle
   //"main": "ping_verticle.js",
+  "main": "server.js",
 
   // Python verticle
   //"main": "ping_verticle.py",
