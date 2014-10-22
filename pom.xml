@@ -92,13 +92,6 @@
       <version>${vertx.testtools.version}</version>
       <scope>test</scope>
     </dependency>
-    
-    <dependency>
-        <groupId>io.vertx</groupId>
-        <artifactId>mod-mongo-persistor</artifactId>
-        <version>2.1.1</version>
-        <scope>compile</scope>
-    </dependency>
 
     <!-- Add any other dependencies that you want packaged into your module (in the lib dir) here
     as 'compile' dependencies. Here is an example
