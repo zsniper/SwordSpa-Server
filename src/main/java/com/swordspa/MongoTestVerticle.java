@@ -21,7 +21,7 @@ public class MongoTestVerticle extends Verticle {
         mongo_config.putString("host", PERSISTENCE_MONGODB_HOST);
         mongo_config.putNumber("port", PERSISTENCE_MONGODB_PORT);
         mongo_config.putNumber("pool_size", 10);
-        mongo_config.putString("database", MONGODB_DATABASE);
+        mongo_config.putString("db_name", MONGODB_DATABASE);
  
         // deploy the mongo-persistor module, which we'll use for persistence
         container.deployModule("io.vertx~mod-mongo-persistor~2.1.1", mongo_config);
