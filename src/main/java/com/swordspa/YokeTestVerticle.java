@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.crypto.Mac;
-import javax.xml.transform.Source;
 
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
+import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.HttpClientRequest;
 import org.vertx.java.core.http.HttpClientResponse;
@@ -31,11 +31,28 @@ import com.jetdrone.vertx.yoke.middleware.YokeRequest;
 import com.jetdrone.vertx.yoke.util.Utils;
 
 public class YokeTestVerticle extends Verticle {
-
+	
+	public final static String MONGODB_BUSADDR = "mongo-persistor";
+	public final static String MONGODB_DATABASE = "vertx";
+	public final static String PERSISTENCE_MONGODB_HOST = "127.0.0.1";
+	public final static Integer PERSISTENCE_MONGODB_PORT = Integer.valueOf(27017);
+	
 	// This is an example only use a proper persistent storage
 	Map<String, String> storage = new HashMap<>();
   
 	public void start () {
+		// set up mongo
+		JsonObject mongo_config = new JsonObject();
+        mongo_config.putString("address", MONGODB_BUSADDR);
+        mongo_config.putString("host", PERSISTENCE_MONGODB_HOST);
+        mongo_config.putNumber("port", PERSISTENCE_MONGODB_PORT);
+        mongo_config.putNumber("pool_size", 10);
+        mongo_config.putString("db_name", MONGODB_DATABASE);
+ 
+        // deploy the mongo-persistor module, which we'll use for persistence
+        container.deployModule("io.vertx~mod-mongo-persistor~2.1.1", mongo_config);
+		
+        // set up yoke
 		final Yoke yoke = new Yoke(vertx);
 		yoke.engine("html", new StringPlaceholderEngine());
 
@@ -47,7 +64,7 @@ public class YokeTestVerticle extends Verticle {
 		yoke.use(new BodyParser());
 		yoke.use(new Static("static"));
 		yoke.use(new ErrorHandler(true));
-
+		
 		// routes
 		yoke.use(new Router()
 		.get("/", new Middleware() {
@@ -62,6 +79,26 @@ public class YokeTestVerticle extends Verticle {
 					request.put("email", "'" + email + "'");
 				}
 				request.response().render("views/persona.html", next);
+			}
+		})
+		.get("/search/allentries", new Middleware() {
+			@Override
+			public void handle(final YokeRequest request, final Handler<Object> next) {
+				
+				String state = request.getParameter("state", "AL");
+				
+				JsonObject matcher = new JsonObject().putString("state", state);
+                JsonObject json = new JsonObject().putString("collection", "zips")
+                        .putString("action", "find")
+                        .putObject("matcher", matcher);
+				
+				vertx.eventBus().send(MONGODB_BUSADDR, json, new Handler<Message<JsonObject>>() {
+                    @Override
+                    public void handle(Message<JsonObject> message) {
+                        // send the response back, encoded as string
+                    	request.response().end(message.body().encodePrettily());
+                    }
+                });
 			}
 		})
 		.post("/auth/logout", new Middleware() {
