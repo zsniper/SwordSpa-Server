@@ -92,6 +92,13 @@
       <version>${vertx.testtools.version}</version>
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+	  <groupId>com.jetdrone</groupId>
+	  <artifactId>yoke</artifactId>
+	  <version>1.0.1</version>
+	  <scope>provided</scope>
+	</dependency>
 
     <!-- Add any other dependencies that you want packaged into your module (in the lib dir) here
     as 'compile' dependencies. Here is an example

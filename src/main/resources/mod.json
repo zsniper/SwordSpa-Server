@@ -1,7 +1,9 @@
 {
 
   // Java verticle
-  "main":"com.swordspa.MongoTestVerticle",
+  //"main":"com.swordspa.MongoTestVerticle",
+  "main":"com.swordspa.YokeTestVerticle",
+  "includes": "com.jetdrone~yoke~1.0.1",
 
   // In this example we also provide various other versions of the main verticle, you can uncomment this and
   // play around:
