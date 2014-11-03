@@ -101,10 +101,14 @@ public class YokeTestVerticle extends Verticle {
                 });
 			}
 		})
+		//handler test for angular.
 		.get("/angular", new Middleware(){
 			@Override
 			public void handle (final YokeRequest request, final Handler<Object> next){
 				JsonObject jsonTest = new JsonObject().putString("test", "works!");
+				//Should probably remove this later, something along the lines of security and can only 
+				//read stuff from the same origin/domain.
+				request.response().putHeader("Access-Control-Allow-Origin", "*");
 				request.response().end(jsonTest);
 			}
 		})
