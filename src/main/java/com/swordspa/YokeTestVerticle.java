@@ -33,7 +33,7 @@ import com.jetdrone.vertx.yoke.util.Utils;
 public class YokeTestVerticle extends Verticle {
 	
 	public final static String MONGODB_BUSADDR = "mongo-persistor";
-	public final static String MONGODB_DATABASE = "vertx";
+	public final static String MONGODB_DATABASE = "swordspa-test";
 	public final static String PERSISTENCE_MONGODB_HOST = "127.0.0.1";
 	public final static Integer PERSISTENCE_MONGODB_PORT = Integer.valueOf(27017);
 	
@@ -65,7 +65,40 @@ public class YokeTestVerticle extends Verticle {
 		yoke.use(new Static("static"));
 		yoke.use(new ErrorHandler(true));
 		
+		yoke.use(new Router()
+		.get("/", new Middleware() {
+			@Override
+			public void handle(final YokeRequest request, final Handler<Object> next) {
+				String option = request.getParameter("option", "all");
+				String userid = request.getParameter("userid", "");
+				String entryid = request.getParameter("entryid", "");
+				JsonObject json = new JsonObject().putString("collection", "users")
+						.putString("action", "find");
+				
+				if (option.equals("entries") && userid.length() > 0) {
+					 json.putObject("matcher", new JsonObject().putString("_id", userid))
+					 .putString("keys", "profiles.personalId.entries");
+					 
+					 if (entryid.length() > 0) {
+						 json.putObject("keys", new JsonObject().putNumber("profiles.personalId.entries." + entryid, 1));
+					 }
+					 
+				}
+
+				System.out.println("json: " + json.encodePrettily());
+				
+				vertx.eventBus().send(MONGODB_BUSADDR, json, new Handler<Message<JsonObject>>() {
+                    @Override
+                    public void handle(Message<JsonObject> message) {
+                        // send the response back, encoded as string
+                    	request.response().end(message.body().encodePrettily());
+                    }
+                });
+			}
+		}));
+		
 		// routes
+		/*
 		yoke.use(new Router()
 		.get("/", new Middleware() {
 			@Override
@@ -182,6 +215,7 @@ public class YokeTestVerticle extends Verticle {
 				clientRequest.end(data);
 			}
 		}));
+		*/
 
 		yoke.listen(8080);
 		container.logger().info("Yoke server listening on port 8080");
