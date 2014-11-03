@@ -101,6 +101,13 @@ public class YokeTestVerticle extends Verticle {
                 });
 			}
 		})
+		.get("/angular", new Middleware(){
+			@Override
+			public void handle (final YokeRequest request, final Handler<Object> next){
+				JsonObject jsonTest = new JsonObject().putString("test", "works!");
+				request.response().end(jsonTest);
+			}
+		})
 		.post("/auth/logout", new Middleware() {
 			@Override
 			public void handle(YokeRequest request, Handler<Object> next) {
