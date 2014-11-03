@@ -1,0 +1,87 @@
+// inserts a new user
+db.users.insert(
+	{
+		name: "Justin",
+		username: "justin",
+		password: "justin",
+		profiles: {
+			personalId: {
+				profileName: "Personal",
+				autofill: [],
+				entries: {
+					objectId: {
+						domain: "Google",
+						username: "justin@gmail.com",
+						password: "justin",
+						dateCreated: new Date(),
+						categories: []
+					}
+				}
+			}
+		},
+		categories: {
+			categoryId: {
+				name: "Mail Accounts",
+				color: "FF0000"
+			}
+		}
+	}
+)
+
+// select all entries | Still need to traverse structure.
+db.users.find(
+	{
+		_id: ObjectId("5456f12026b2c0c005179861")
+	},
+	{
+		"profiles.personalId.entries":1
+	}
+)
+
+// select specific entry "a" | Still need to traverse structure.
+db.users.find(
+	{
+		_id: ObjectId("5456f12026b2c0c005179861")
+	},
+	{
+		"profiles.personalId.entries.a":1
+	}
+)
+
+// updating existing entry | change "objectId"
+db.users.update(
+	{
+		_id: ObjectId("5456f12026b2c0c005179861")
+	},
+	{$set:
+		{
+			"profiles.personalId.entries.objectId":
+			{
+				domain: "Google",
+				username: "justin@gmail.com",
+				password: "justin",
+				dateCreated: new Date(),
+				categories: []
+			}
+		}
+	}
+)
+
+// creating new entry
+db.users.update(
+	{
+		_id: ObjectId("5456f12026b2c0c005179861")
+	},
+	{$set:
+		{
+			"profiles.personalId.entries.objectId2":
+			{
+				domain: "Google2",
+				username: "justin@gmail.com",
+				password: "justin",
+				dateCreated: new Date(),
+				categories: []
+			}
+		}
+	}
+)
