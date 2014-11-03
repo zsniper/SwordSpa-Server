@@ -87,10 +87,9 @@ public class YokeTestVerticle extends Verticle {
 				
 				String state = request.getParameter("state", "AL");
 				
-				JsonObject matcher = new JsonObject().putString("state", state);
                 JsonObject json = new JsonObject().putString("collection", "zips")
                         .putString("action", "find")
-                        .putObject("matcher", matcher);
+                        .putObject("matcher", new JsonObject().putString("state", state));
 				
 				vertx.eventBus().send(MONGODB_BUSADDR, json, new Handler<Message<JsonObject>>() {
                     @Override
