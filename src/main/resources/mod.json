@@ -23,6 +23,7 @@
   // JavaScript verticle
   //"main": "ping_verticle.js",
   //"main": "server.js",
+  // "main": "server-router.js",
 
   // Python verticle
   //"main": "ping_verticle.py",

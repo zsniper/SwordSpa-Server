@@ -4,6 +4,8 @@
 *.iws
 .classpath
 .project
+*.sublime-project
+*.sublime-workspace
 .settings/
 
 .gradle/

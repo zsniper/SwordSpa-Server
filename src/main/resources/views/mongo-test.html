@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>${title}</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+</head>
+<body>
+  <ul>
+      <li><a id="get-users" href="#"><span>List all users</span></a></li>
+      <li><a id="get-entries" href="#"><span>List all entries for first user</span></a></li>
+      <li><a id="insert" href="#"><span>Insert a new user</span></a></li>
+      <li><a id="addentry" href="#"><span>Add a new entry to first user</span></a></li>
+      <li><a id="updateEntry" href="#"><span>Update the first entry of first user</span></a></li>
+      <li><a id="clear" href="#">Clear DB</a></li>
+  </ul>
+  <div>Current User: 
+  	<div id="userdesc"></div>
+  </div>
+  <div>Current entries: 
+  	<div id="entriesdesc"></div>
+  </div>
+  
+</body>
+<script>
+
+  var userid = "0cbcd6f4-2a3f-4374-812e-afed4a96965b";
+  var listUsers= document.getElementById('get-users');
+  if (listUsers) {
+    listUsers.onclick = function() { 
+    	$.post( "find", {option:"all"}, function( data ) {
+			$( "#userdesc" ).html( data );
+		});
+    };
+  }
+
+  var listEntries = document.getElementById('get-entries');
+  if (listEntries) {
+    listEntries.onclick = function() {
+    	$.post( "find", {option:"entries", userid:userid}, function( data ) {
+			$( "#entriesdesc" ).html( data );
+		});
+    };
+  }
+  
+  var insertUser = document.getElementById('insert');
+  if (insertUser) {
+    insertUser.onclick = function() {
+    	$.post( "insert", {name:"Justin", username:"justin", password:"justin"}, function( data ) {
+			$( "#entriesdesc" ).html( data );
+		});
+    };
+  }
+  
+  var insertEntry = document.getElementById('addentry');
+  if (insertEntry) {
+    insertEntry.onclick = function() {
+    	$.post( "upsertentry", {userid:userid,domain:"Yahoo", username:"justin@yahoo.com", password:"justin1", update:"no"}, function( data ) {
+			$( "#entriesdesc" ).html( data );
+		});
+    };
+  }
+
+  var updateEntry = document.getElementById('updateEntry');
+  if (updateEntry) {
+    updateEntry.onclick = function() {
+      $.post( "upsertentry", {userid:userid,domain:"Yahoo", username:"justin@yahoo.com", password:"justin1", update:"yes"}, function( data ) {
+      $( "#entriesdesc" ).html( data );
+    });
+    };
+  }
+  var clearDB = document.getElementById('clear');
+  if (clearDB) {
+    clearDB.onclick = function() {
+      $.post( "clear", function( data ) {
+      $( "#entriesdesc" ).html( "Cleared" );
+    });
+    };
+  }
+  
+  
+</script>
+</html>

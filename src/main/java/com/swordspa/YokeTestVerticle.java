@@ -69,19 +69,25 @@ public class YokeTestVerticle extends Verticle {
 		.get("/", new Middleware() {
 			@Override
 			public void handle(final YokeRequest request, final Handler<Object> next) {
-				String option = request.getParameter("option", "all");
-				String userid = request.getParameter("userid", "");
-				String entryid = request.getParameter("entryid", "");
+				request.response().render("views/mongo-test.html", next);
+			}
+		})
+		.post("/find", new Middleware() {
+			@Override
+			public void handle(final YokeRequest request, final Handler<Object> next) {
+				String option = request.formAttributes().get("option");
+				String userid = request.formAttributes().get("userid");
+				String entryid = request.formAttributes().get("entryid");
 				JsonObject json = new JsonObject().putString("collection", "users")
 						.putString("action", "find");
 				
-				if (option.equals("entries") && userid.length() > 0) {
-					 json.putObject("matcher", new JsonObject().putString("_id", userid))
-					 .putString("keys", "profiles.personalId.entries");
-					 
-					 if (entryid.length() > 0) {
-						 json.putObject("keys", new JsonObject().putNumber("profiles.personalId.entries." + entryid, 1));
-					 }
+				if (option != null && option.equals("entries") && userid != null && userid.length() > 0) {
+					json.putObject("matcher", new JsonObject().putString("_id", userid));
+					json.putObject("keys", new JsonObject().putNumber("profiles.personalId.entries", 1));
+					
+					if (entryid != null && entryid.length() > 0) {
+						json.putObject("keys", new JsonObject().putNumber("profiles.personalId.entries." + entryid, 1));
+					}
 					 
 				}
 
@@ -90,10 +96,92 @@ public class YokeTestVerticle extends Verticle {
 				vertx.eventBus().send(MONGODB_BUSADDR, json, new Handler<Message<JsonObject>>() {
                     @Override
                     public void handle(Message<JsonObject> message) {
-                        // send the response back, encoded as string
                     	request.response().end(message.body().encodePrettily());
                     }
                 });
+			}
+		})
+		.post("/insert", new Middleware() {
+			@Override
+			public void handle(final YokeRequest request, final Handler<Object> next) {
+				String name = request.formAttributes().get("name");
+				String username = request.formAttributes().get("username");
+				String password = request.formAttributes().get("password");
+				
+				System.out.println("name:" + name);
+				
+				JsonObject json = new JsonObject().putString("collection", "users")
+						.putString("action", "save");
+
+				json.putObject("document",
+						new JsonObject().putString("name", name)
+										.putString("username", username)
+										.putString("password", password)
+										.putObject("profiles", new JsonObject()
+																.putObject("personalId", new JsonObject()
+																							.putString("profileName", "Personal")
+																							.putObject("entries", new JsonObject()
+																													.putObject("objectId", new JsonObject()
+																																.putString("domain", "Google")
+																																.putString("username", "justin@gmail.com")
+																																.putString("password", "justin"))))));
+
+				vertx.eventBus().send(MONGODB_BUSADDR, json, new Handler<Message<JsonObject>>() {
+                    @Override
+                    public void handle(Message<JsonObject> message) {
+                    	request.response().end(message.body().encodePrettily());
+                    }
+                });
+
+			}
+		})
+		.post("/upsertentry", new Middleware() {
+			@Override
+			public void handle(final YokeRequest request, final Handler<Object> next) {
+				String domain = request.formAttributes().get("domain");
+				String username = request.formAttributes().get("username");
+				String password = request.formAttributes().get("password");
+				String userid = request.formAttributes().get("userid");
+				String update = request.formAttributes().get("update");
+				
+				System.out.println("name:" + domain);
+				
+				JsonObject json = new JsonObject().putString("collection", "users")
+						.putString("action", "update")
+						.putBoolean("upsert", true);
+
+				json.putObject("criteria", new JsonObject()
+											.putString("_id", userid));
+				json.putObject("objNew",
+						new JsonObject().putObject("$set", new JsonObject()
+							.putObject("profiles.personalId.entries.objectId" + ((update != null && update.equals("yes"))?2:""),
+								new JsonObject()
+									.putString("domain", domain)
+									.putString("username", username)
+									.putString("password", password))));
+
+				vertx.eventBus().send(MONGODB_BUSADDR, json, new Handler<Message<JsonObject>>() {
+                    @Override
+                    public void handle(Message<JsonObject> message) {
+                    	request.response().end(message.body().encodePrettily());
+                    }
+                });
+
+			}
+		})
+		.post("/clear", new Middleware() {
+			@Override
+			public void handle(final YokeRequest request, final Handler<Object> next) {
+				JsonObject json = new JsonObject().putString("collection", "users")
+						.putString("action", "drop_collection");
+
+				vertx.eventBus().send(MONGODB_BUSADDR, json, new Handler<Message<JsonObject>>() {
+                    @Override
+                    public void handle(Message<JsonObject> message) {
+                    	request.response().end(message.body().encodePrettily());
+                    }
+                });
+
 			}
 		}));
 		
